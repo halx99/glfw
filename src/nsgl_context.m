@@ -317,7 +317,7 @@ GLFWbool _glfwCreateContextNSGL(_GLFWwindow* window,
 
 #undef addAttrib
 #undef setAttrib
-    
+#undef popAttrib    
 
     NSOpenGLContext* share = nil;
 
