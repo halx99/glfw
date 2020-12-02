@@ -194,11 +194,11 @@ GLFWbool _glfwCreateContextNSGL(_GLFWwindow* window,
     attribs[index++] = a; \
 }
 #define setAttrib(a, v) { addAttrib(a); addAttrib(v); }
+#define popAttrib(a) { assert(index >= 2); a[(index--) - 2] = 0; }
 
     NSOpenGLPixelFormatAttribute attribs[40];
     int index = 0;
 
-    addAttrib(NSOpenGLPFAAccelerated);
     addAttrib(NSOpenGLPFAClosestPolicy);
 
     if (ctxconfig->nsgl.offline)
@@ -295,22 +295,29 @@ GLFWbool _glfwCreateContextNSGL(_GLFWwindow* window,
         }
     }
 
+    addAttrib(NSOpenGLPFAAccelerated);
+    
     // NOTE: All NSOpenGLPixelFormats on the relevant cards support sRGB
     //       framebuffer, so there's no need (and no way) to request it
-
     addAttrib(0);
-
-#undef addAttrib
-#undef setAttrib
 
     window->context.nsgl.pixelFormat =
         [[NSOpenGLPixelFormat alloc] initWithAttributes:attribs];
     if (window->context.nsgl.pixelFormat == nil)
     {
-        _glfwInputError(GLFW_FORMAT_UNAVAILABLE,
-                        "NSGL: Failed to find a suitable pixel format");
-        return GLFW_FALSE;
+        popAttrib(attribs);
+        window->context.nsgl.pixelFormat =
+            [[NSOpenGLPixelFormat alloc] initWithAttributes:attribs];
+        if(window->context.nsgl.pixelFormat == nil) {
+            _glfwInputError(GLFW_FORMAT_UNAVAILABLE,
+                            "NSGL: Failed to find a suitable pixel format");
+            return GLFW_FALSE;
+        }
     }
+
+#undef addAttrib
+#undef setAttrib
+    
 
     NSOpenGLContext* share = nil;
 
