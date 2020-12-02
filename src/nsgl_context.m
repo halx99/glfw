@@ -305,7 +305,8 @@ GLFWbool _glfwCreateContextNSGL(_GLFWwindow* window,
         [[NSOpenGLPixelFormat alloc] initWithAttributes:attribs];
     if (window->context.nsgl.pixelFormat == nil)
     {
-        popAttrib(attribs);
+        // pop NSOpenGLPFAAccelerated and try again for macOS on vmware
+        popAttrib(attribs); 
         window->context.nsgl.pixelFormat =
             [[NSOpenGLPixelFormat alloc] initWithAttributes:attribs];
         if(window->context.nsgl.pixelFormat == nil) {
